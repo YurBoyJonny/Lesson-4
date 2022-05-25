@@ -20,13 +20,16 @@ namespace Lesson_4
         SpriteFont timeFont;
 
         SoundEffect explode;
+        SoundEffectInstance explodeInstance;
 
         float seconds;
         float startTime;
 
         MouseState mouseState;
 
-        float explodedTime;
+        bool exploded;
+
+        Rectangle greenWire;
 
         public Game1()
         {
@@ -41,8 +44,12 @@ namespace Lesson_4
             _graphics.ApplyChanges(); // Applies the new dimensions
             // TODO: Add your initialization logic here
 
+            exploded = false;
             bombRect = new Rectangle(50, 50, 700, 400);
-            explosionRect = new Rectangle(50, 50, 700, 400);
+            explosionRect = new Rectangle(0, 0, 800, 500);
+
+            greenWire = new Rectangle(50, 50, 700, 400); ///////////////////////
+
             base.Initialize();
         }
         protected override void LoadContent()
@@ -55,9 +62,12 @@ namespace Lesson_4
             timeFont = Content.Load<SpriteFont>("Time");
 
             explode = Content.Load<SoundEffect>("explosion");
+            explodeInstance = explode.CreateInstance();
 
             explosionTexture = Content.Load<Texture2D>("bombExploded");
-            explosionRect = new Rectangle(50, 50, 800, 500);
+            explosionRect = new Rectangle(0, 0, 800, 500);
+
+            greenWire = new Rectangle(50, 50, 700, 400);
         }
         protected override void Update(GameTime gameTime)
         {
@@ -68,15 +78,20 @@ namespace Lesson_4
             seconds = (float)gameTime.TotalGameTime.TotalSeconds - startTime;
             if (seconds > 15) // Takes a timestamp every 10 seconds.
             {
-                explode.Play();
+                explodeInstance.Play();
                 startTime = (float)gameTime.TotalGameTime.TotalSeconds;
-                explosionRect = new Rectangle(50, 50, 800, 500);
-                explodedTime.ToString();
+                exploded = true;
+                explosionRect = new Rectangle(0, 0, 800, 500);
             }
 
+            if (exploded && explodeInstance.State == SoundState.Stopped)
+                Exit();
+
             mouseState = Mouse.GetState();
-            if (mouseState.LeftButton == ButtonState.Pressed)
+
+            if (mouseState.LeftButton == ButtonState.Pressed && mouseState.X.Equals(greenWire.Size) && mouseState.Y.Equals(greenWire.Size))
                 startTime = (float)gameTime.TotalGameTime.TotalSeconds;
+
             base.Update(gameTime);
         }
         protected override void Draw(GameTime gameTime)
@@ -87,12 +102,10 @@ namespace Lesson_4
             _spriteBatch.Begin();
             _spriteBatch.Draw(bombTexture, bombRect, Color.White);
             _spriteBatch.DrawString(timeFont, (15 - seconds).ToString("0:00"), new Vector2(270, 200), Color.Black);
-            if (seconds > 15 && explodedTime == 3)
+            if (exploded)
             {
                 _spriteBatch.Draw(explosionTexture, explosionRect, Color.White);
-
             }
-
             _spriteBatch.End();
             base.Draw(gameTime);
         }
