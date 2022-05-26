@@ -29,7 +29,8 @@ namespace Lesson_4
 
         bool exploded;
 
-        Rectangle greenWire;
+        Texture2D defuseTexture;
+        Rectangle defuse;
 
         public Game1()
         {
@@ -48,7 +49,7 @@ namespace Lesson_4
             bombRect = new Rectangle(50, 50, 700, 400);
             explosionRect = new Rectangle(0, 0, 800, 500);
 
-            greenWire = new Rectangle(50, 50, 700, 400); ///////////////////////
+            defuse = new Rectangle(175, 60, 100, 50); ///////////////////////
 
             base.Initialize();
         }
@@ -67,13 +68,13 @@ namespace Lesson_4
             explosionTexture = Content.Load<Texture2D>("bombExploded");
             explosionRect = new Rectangle(0, 0, 800, 500);
 
-            greenWire = new Rectangle(50, 50, 700, 400);
+            defuseTexture = Content.Load<Texture2D>("rectangle");
+            defuse = new Rectangle(175, 60, 60, 50);
         }
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
             // TODO: Add your update logic here
             seconds = (float)gameTime.TotalGameTime.TotalSeconds - startTime;
             if (seconds > 15) // Takes a timestamp every 10 seconds.
@@ -83,14 +84,13 @@ namespace Lesson_4
                 exploded = true;
                 explosionRect = new Rectangle(0, 0, 800, 500);
             }
-
             if (exploded && explodeInstance.State == SoundState.Stopped)
                 Exit();
-
             mouseState = Mouse.GetState();
 
-            if (mouseState.LeftButton == ButtonState.Pressed && mouseState.X.Equals(greenWire.Size) && mouseState.Y.Equals(greenWire.Size))
-                startTime = (float)gameTime.TotalGameTime.TotalSeconds;
+            if (mouseState.LeftButton == ButtonState.Pressed)
+                if (defuse.Contains(mouseState.X, mouseState.Y))
+                    startTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
             base.Update(gameTime);
         }
@@ -101,6 +101,7 @@ namespace Lesson_4
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
             _spriteBatch.Draw(bombTexture, bombRect, Color.White);
+            _spriteBatch.Draw(defuseTexture, defuse, Color.Green);
             _spriteBatch.DrawString(timeFont, (15 - seconds).ToString("0:00"), new Vector2(270, 200), Color.Black);
             if (exploded)
             {
